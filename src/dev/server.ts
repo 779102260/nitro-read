@@ -157,9 +157,11 @@ export function createDevServer(nitro: Nitro): NitroDevServer {
   nitro.hooks.hook("dev:reload", reload);
 
   // App
+  // *
   const app = createApp();
 
   // Dev-only handlers
+  // * 
   for (const handler of nitro.options.devHandlers) {
     app.use(handler.route || "/", handler.handler);
   }
@@ -167,6 +169,7 @@ export function createDevServer(nitro: Nitro): NitroDevServer {
   app.use("/_vfs", createVFSHandler(nitro));
 
   // Serve asset dirs
+  // * 静态资源地址
   for (const asset of nitro.options.publicAssets) {
     const url = joinURL(nitro.options.runtimeConfig.app.baseURL, asset.baseURL);
     app.use(url, fromNodeMiddleware(serveStatic(asset.dir)));
@@ -176,6 +179,7 @@ export function createDevServer(nitro: Nitro): NitroDevServer {
   }
 
   // User defined dev proxy
+  // * dev 代理
   for (const route of Object.keys(nitro.options.devProxy).sort().reverse()) {
     let opts = nitro.options.devProxy[route];
     if (typeof opts === "string") {
@@ -237,9 +241,10 @@ export function createDevServer(nitro: Nitro): NitroDevServer {
     })
   );
 
-  // Listen
+  // * Listen
   let listeners: Listener[] = [];
   const _listen: NitroDevServer["listen"] = async (port, opts?) => {
+    // *
     const listener = await listen(toNodeListener(app), { port, ...opts });
     listeners.push(listener);
     return listener;
