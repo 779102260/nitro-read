@@ -245,10 +245,14 @@ export interface NitroOptions extends PresetOptions {
 
   // Dirs
   workspaceDir: string;
+  /** 根目录 */
   rootDir: string;
+  /** 代码目录 */
   srcDir: string;
+  /** 需要扫描的目录 */
   scanDirs: string[];
   buildDir: string;
+  /** bundle生成目录 */
   output: {
     dir: string;
     serverDir: string;
@@ -256,7 +260,9 @@ export interface NitroOptions extends PresetOptions {
   };
 
   // Features
+  /** 存储配置 */
   storage: StorageMounts;
+  /** dev存储配置，覆盖上面 */
   devStorage: StorageMounts;
   bundledStorage: string[];
   timing: boolean;
@@ -296,21 +302,29 @@ export interface NitroOptions extends PresetOptions {
   future: {
     nativeSWR: boolean;
   };
+  /** 服务端静态资源目录(assets)，使用 useStorage('assets:server') 来引用这些资源 */
   serverAssets: ServerAssetDir[];
+  /** 前端可以直接访问的静态资源目录(public)，包含scanDirs下面的同名目录 */
   publicAssets: PublicAssetDir[];
 
   imports: UnimportPluginOptions | false;
   modules?: NitroModuleInput[];
+  /** 插件目录 */
   plugins: string[];
+  /** TODO */
   tasks: { [name: string]: { handler: string; description: string } };
+  /** 虚拟模块{[模块路径]: 执行代码} */
   virtual: Record<string, string | (() => string | Promise<string>)>;
   compressPublicAssets: boolean | CompressOptions;
   ignore: string[];
 
   // Dev
   dev: boolean;
+  /** 设置开发服务器的相关配置，比如监听的文件 */
   devServer: DevServerOptions;
+  /** 监听选项 */
   watchOptions: WatchOptions;
+  /** dev代理 */
   devProxy: Record<string, string | ProxyServerOptions>;
 
   // Logging
@@ -320,9 +334,11 @@ export interface NitroOptions extends PresetOptions {
   };
 
   // Routing
+  /** server基目录，拼接路径时作为前缀 */
   baseURL: string;
   handlers: NitroEventHandler[];
   routeRules: { [path: string]: NitroRouteRules };
+  /** devHandlers 用于在开发模式下定义特定的路由处理程序。这可以在开发过程中快速测试和调试特定的功能或路由 */
   devHandlers: NitroDevEventHandler[];
   errorHandler: string;
   devErrorHandler: NitroErrorHandler;

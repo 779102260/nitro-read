@@ -19,6 +19,10 @@ export default defineCommand({
     ...commonArgs,
     ...getArgs(),
   },
+  /**
+   * 根据目录结构和用户配置生成最终配置 -> 启动本地服务 -> 生成rollup配置 -> 使用rollup构建
+   * 大部分功能感觉都在rollup里（一堆插件）
+   */
   async run({ args }) {
     const rootDir = resolve((args.dir || args._dir || ".") as string);
     let nitro: Nitro;
@@ -30,6 +34,7 @@ export default defineCommand({
         }
         await nitro.close();
       }
+      // 生成配置
       nitro = await createNitro(
         {
           rootDir,
@@ -59,10 +64,14 @@ export default defineCommand({
         }
       );
       nitro.hooks.hookOnce("restart", reload);
+      // 创建服务
       const server = createDevServer(nitro);
       const listhenOptions = parseArgs(args);
+      // 启动服务
       await server.listen(listhenOptions.port, listhenOptions);
+      // 创建文件夹
       await prepare(nitro);
+      // 构建（运行rollup）
       await build(nitro);
     };
     await reload();

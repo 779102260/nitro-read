@@ -74,11 +74,13 @@ export async function scanServerRoutes(
   });
 }
 
+/** 扫描插件目录文件 */
 export async function scanPlugins(nitro: Nitro) {
   const files = await scanFiles(nitro, "plugins");
   return files.map((f) => f.fullPath);
 }
 
+/** // TODO 干嘛的 */
 export async function scanTasks(nitro: Nitro) {
   const files = await scanFiles(nitro, "tasks");
   return files.map((f) => {

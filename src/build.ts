@@ -34,11 +34,14 @@ import { snapshotStorage } from "./storage";
 import { compressPublicAssets } from "./compress";
 
 export async function prepare(nitro: Nitro) {
+  // 创建output目录
   await prepareDir(nitro.options.output.dir);
   if (!nitro.options.noPublicDir) {
+    // 静态文件目录
     await prepareDir(nitro.options.output.publicDir);
   }
   if (!nitro.options.static) {
+    // 服务端目录
     await prepareDir(nitro.options.output.serverDir);
   }
 }
@@ -88,8 +91,10 @@ export async function copyPublicAssets(nitro: Nitro) {
 }
 
 export async function build(nitro: Nitro) {
+  // 生成rollup配置（安装了一大堆插件）
   const rollupConfig = getRollupConfig(nitro);
   await nitro.hooks.callHook("rollup:before", nitro, rollupConfig);
+  // 构建
   return nitro.options.dev
     ? _watch(nitro, rollupConfig)
     : _build(nitro, rollupConfig);

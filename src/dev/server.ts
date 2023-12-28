@@ -161,25 +161,28 @@ export function createDevServer(nitro: Nitro): NitroDevServer {
   const app = createApp();
 
   // Dev-only handlers
-  // * 
+  // devHandlers 用于在开发模式下定义特定的路由处理程序。这可以在开发过程中快速测试和调试特定的功能或路由
   for (const handler of nitro.options.devHandlers) {
     app.use(handler.route || "/", handler.handler);
   }
   // Debugging endpoint to view vfs
+  // TODO vfs是什么
   app.use("/_vfs", createVFSHandler(nitro));
 
   // Serve asset dirs
   // * 静态资源地址
   for (const asset of nitro.options.publicAssets) {
     const url = joinURL(nitro.options.runtimeConfig.app.baseURL, asset.baseURL);
+    // 创建一个中间件函数，用于从指定的根目录中提供文件服务
     app.use(url, fromNodeMiddleware(serveStatic(asset.dir)));
     if (!asset.fallthrough) {
+      // 默认的fallback，用于404等
       app.use(url, fromNodeMiddleware(servePlaceholder()));
     }
   }
 
   // User defined dev proxy
-  // * dev 代理
+  // * dev 代理中间件，类似devServer
   for (const route of Object.keys(nitro.options.devProxy).sort().reverse()) {
     let opts = nitro.options.devProxy[route];
     if (typeof opts === "string") {
@@ -195,6 +198,7 @@ export function createDevServer(nitro: Nitro): NitroDevServer {
   }
 
   // Main worker proxy
+  // TODO
   const proxy = createProxy();
   proxy.proxy.on("proxyReq", (proxyReq, req) => {
     const proxyRequestHeaders = proxyReq.getHeaders();
@@ -242,6 +246,7 @@ export function createDevServer(nitro: Nitro): NitroDevServer {
   );
 
   // * Listen
+  // 启动服务入口
   let listeners: Listener[] = [];
   const _listen: NitroDevServer["listen"] = async (port, opts?) => {
     // *
@@ -251,8 +256,11 @@ export function createDevServer(nitro: Nitro): NitroDevServer {
   };
 
   // Optional watcher
+  // 监听指定文件变化，用于reload服务
+  // TODO reload怎么做的
   let watcher: FSWatcher = null;
   if (nitro.options.devServer.watch.length > 0) {
+    // TODO chokidar监听文件变化的lib， 比 fs.watch 和 fs.watchFile  fsevents更强
     watcher = watch(nitro.options.devServer.watch, nitro.options.watchOptions);
     watcher.on("add", reload).on("change", reload);
   }
@@ -277,6 +285,7 @@ export function createDevServer(nitro: Nitro): NitroDevServer {
   };
 }
 
+/** 创建代理 */
 function createProxy(defaults: ProxyServerOptions = {}) {
   const proxy = createProxyServer(defaults);
   const handle = async (event: H3Event, opts: ProxyServerOptions = {}) => {

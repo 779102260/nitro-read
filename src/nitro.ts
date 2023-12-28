@@ -44,6 +44,7 @@ export async function createNitro(
   };
 
   // Storage
+  // TODO 创建存储实例
   nitro.storage = await createStorage(nitro);
   nitro.hooks.hook("close", async () => {
     await nitro.storage.dispose();
@@ -67,6 +68,7 @@ export async function createNitro(
   nitro.hooks.addHooks(nitro.options.hooks);
 
   // Public assets
+  // 静态资源：查找静态资源目录（除了根目录，还从scanDirs查找）-> 放到routeRules中（比如/public/**）
   for (const dir of options.scanDirs) {
     const publicDir = resolve(dir, "public");
     if (!existsSync(publicDir)) {
@@ -81,10 +83,13 @@ export async function createNitro(
     asset.baseURL = asset.baseURL || "/";
     const isTopLevel = asset.baseURL === "/";
     asset.fallthrough = asset.fallthrough ?? isTopLevel;
+    // route规则
     const routeRule = options.routeRules[asset.baseURL + "/**"];
+    // 缓存时长
     asset.maxAge =
       (routeRule?.cache as { maxAge: number })?.maxAge ?? asset.maxAge ?? 0;
     if (asset.maxAge && !asset.fallthrough) {
+      // TODO 合并对象
       options.routeRules[asset.baseURL + "/**"] = defu(routeRule, {
         headers: {
           "cache-control": `public, max-age=${asset.maxAge}, immutable`,
@@ -94,12 +99,14 @@ export async function createNitro(
   }
 
   // Server assets
+  // 服务端静态资源：添加默认assets目录
   nitro.options.serverAssets.push({
     baseName: "server",
     dir: resolve(nitro.options.srcDir, "assets"),
   });
 
   // Plugins
+  // 插件：扫描插件目录文件 -> 添加到options.plugins
   const scannedPlugins = await scanPlugins(nitro);
   for (const plugin of scannedPlugins) {
     if (!nitro.options.plugins.includes(plugin)) {
@@ -108,6 +115,8 @@ export async function createNitro(
   }
 
   // Tasks
+  // TODO 干嘛的 
+  // 任务：扫描任务目录文件 -> 添加到options.tasks
   const scannedTasks = await scanTasks(nitro);
   for (const scannedTask of scannedTasks) {
     if (scannedTask.name in nitro.options.tasks) {
@@ -158,6 +167,7 @@ export const tasks = {
   `;
 
   // Auto imports
+  // TODO 自动导入 
   if (nitro.options.imports) {
     nitro.unimport = createUnimport(nitro.options.imports);
     await nitro.unimport.init();
@@ -168,6 +178,7 @@ export const tasks = {
   }
 
   // Resolve and run modules after initial setup
+  // TODO 干嘛的
   const scannedModules = await scanModules(nitro);
   const _modules = [...(nitro.options.modules || []), ...scannedModules];
   const modules = await Promise.all(
